@@ -15,7 +15,7 @@ def order_robot_from_RobotSpareBin():
     """
     browser.configure(slowmo=200)
     open_robot_order_website()
-    #download_orders_file()
+    download_orders_file()
     fill_form_with_csv_data()
 
 def open_robot_order_website():
