@@ -3,6 +3,7 @@ from robocorp import browser
 from RPA.HTTP import HTTP
 from RPA.Tables import Tables
 from RPA.PDF import PDF
+from RPA.Archive import Archive
 
 @task
 def order_robot_from_RobotSpareBin():
@@ -17,6 +18,7 @@ def order_robot_from_RobotSpareBin():
     open_robot_order_website()
     download_orders_file()
     fill_form_with_csv_data()
+    archive_receipts()
 
 def open_robot_order_website():
     """Navigates to the given URL and clicks on pop up"""
@@ -30,10 +32,12 @@ def download_orders_file():
     http.download("https://robotsparebinindustries.com/orders.csv", overwrite=True)
 
 def order_another_bot():
+    """Clicks on order another button to order another bot"""
     page = browser.page()
     page.click("#order-another")
 
 def clicks_ok():
+    """Clicks on ok whenever a new order is made for bots"""
     page = browser.page()
     page.click('text=OK')
 
@@ -88,7 +92,13 @@ def screenshot_robot(order_number):
     return screenshot_path
 
 def embed_screenshot_to_receipt(screenshot_path, pdf_path):
+    """Embeds the screenshot to the bot receipt"""
     pdf = PDF()
     pdf.add_watermark_image_to_pdf(image_path=screenshot_path, 
                                    source_path=pdf_path, 
                                    output_path=pdf_path)
+    
+def archive_receipts():
+    """Archives all the receipt pdfs into a single zip archive"""
+    lib = Archive()
+    lib.archive_folder_with_zip("./output/receipts", "./output/receipts.zip")
