@@ -1,8 +1,8 @@
 from robocorp.tasks import task
-from robocorp.browser import Browser
 from robocorp import browser
 from RPA.HTTP import HTTP
 from RPA.Tables import Tables
+from RPA.PDF import PDF
 
 @task
 def order_robot_from_RobotSpareBin():
@@ -27,8 +27,7 @@ def open_robot_order_website():
 def download_orders_file():
     """Downloads the orders file from the give URL"""
     http = HTTP()
-    http.download("https://robotsparebinindustries.com/orders.csv"
-                  , overwrite=True)
+    http.download("https://robotsparebinindustries.com/orders.csv", overwrite=True)
 
 def order_another_bot():
     page = browser.page()
@@ -40,7 +39,6 @@ def clicks_ok():
 
 def fill_and_submit_robot_data(order):
     """Fills in the robot order details and clicks the 'Order' button"""
-    #bro = Browser()
     page = browser.page()
     head_names = {
         "1" : "Roll-a-thor head",
@@ -59,9 +57,21 @@ def fill_and_submit_robot_data(order):
         page.click("#order")
         order_another = page.query_selector("#order-another")
         if order_another:
+            pdf_path = store_receipt_as_pdf(int(order["Order number"]))
+            screenshot_path = screenshot_robot(int(order["Order number"]))
+            embed_screenshot_to_receipt(screenshot_path, pdf_path)
             order_another_bot()
             clicks_ok()
             break
+
+def store_receipt_as_pdf(order_number):
+    """This stores the robot order receipt as pdf"""
+    page = browser.page()
+    order_receipt_html = page.locator("#receipt").inner_html()
+    pdf = PDF()
+    pdf_path = "output/receipts/{0}.pdf".format(order_number)
+    pdf.html_to_pdf(order_receipt_html, pdf_path)
+    return pdf_path
 
 def fill_form_with_csv_data():
     """Read data from csv and fill in the robot order form"""
@@ -69,5 +79,16 @@ def fill_form_with_csv_data():
     robot_orders = csv_file.read_table_from_csv("orders.csv")
     for order in robot_orders:
         fill_and_submit_robot_data(order)
+          
+def screenshot_robot(order_number):
+    """Takes screenshot of the ordered bot image"""
+    page = browser.page()
+    screenshot_path = "output/screenshots/{0}.png".format(order_number)
+    page.locator("#robot-preview-image").screenshot(path=screenshot_path)
+    return screenshot_path
 
-    
+def embed_screenshot_to_receipt(screenshot_path, pdf_path):
+    pdf = PDF()
+    pdf.add_watermark_image_to_pdf(image_path=screenshot_path, 
+                                   source_path=pdf_path, 
+                                   output_path=pdf_path)
