@@ -4,6 +4,7 @@ from RPA.HTTP import HTTP
 from RPA.Tables import Tables
 from RPA.PDF import PDF
 from RPA.Archive import Archive
+import shutil
 
 @task
 def order_robot_from_RobotSpareBin():
@@ -19,6 +20,8 @@ def order_robot_from_RobotSpareBin():
     download_orders_file()
     fill_form_with_csv_data()
     archive_receipts()
+    clean_up()
+
 
 def open_robot_order_website():
     """Navigates to the given URL and clicks on pop up"""
@@ -102,3 +105,8 @@ def archive_receipts():
     """Archives all the receipt pdfs into a single zip archive"""
     lib = Archive()
     lib.archive_folder_with_zip("./output/receipts", "./output/receipts.zip")
+
+def clean_up():
+    """Cleans up the folders where receipts and screenshots are saved."""
+    shutil.rmtree("./output/receipts")
+    shutil.rmtree("./output/screenshots")
