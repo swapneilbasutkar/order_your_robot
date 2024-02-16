@@ -1,4 +1,7 @@
 # How to run the Bot:
+  ## Install vscode
+  ## Download robocorp and robot framework extensions
+  ## From Robocord code extension -> Run Task
 
 # Template: Python - Minimal
 
